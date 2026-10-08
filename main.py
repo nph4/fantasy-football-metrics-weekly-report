@@ -418,9 +418,9 @@ def main() -> None:
 
     args: Namespace = arg_parser.parse_args()
 
-    if app_settings.check_for_updates:
+    # if app_settings.check_for_updates:
         # check to see if the current app is behind any commits, and provide option to update and re-run if behind
-        check_github_for_updates(args.use_default)
+       #  check_github_for_updates(args.use_default)
 
     f_str_newline = "\n"
     args_display = f"{f_str_newline}".join(
