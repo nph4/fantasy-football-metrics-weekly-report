@@ -34,11 +34,17 @@ class HighRollerFeature(BaseFeature):
 
         defense = {
             "CB": "D",
+            "DB": "D",
             "DE": "D",
+            "DL": "D",
             "DT": "D",
+            "ED": "D",
+            "EDGE": "D",
             "FS": "D",
             "ILB": "D",
+            "IDL": "D",
             "LB": "D",
+            "NT": "D",
             "OLB": "D",
             "S": "D",
             "SS": "D",
@@ -57,8 +63,12 @@ class HighRollerFeature(BaseFeature):
         offensive_line = {
             "C": "L",
             "G": "L",
+            "LG": "L",
             "LS": "L",
             "LT": "L",
+            "OL": "L",
+            "OT": "L",
+            "RG": "L",
             "RT": "L",
             "T": "L",
         }
