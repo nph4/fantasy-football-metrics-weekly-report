@@ -1,7 +1,6 @@
 __author__ = "Wren J. R. (uberfastman)"
 __email__ = "uberfastman@uberfastman.dev"
 
-from datetime import datetime
 from pathlib import Path
 from typing import Dict
 
@@ -114,11 +113,15 @@ class HighRollerFeature(BaseFeature):
         if re.fullmatch(r"\$?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.00)?", amount_text) is None:
             raise ValueError(f"Invalid Spotrac fine amount {amount_text!r} for {full_name}")
         amount = int(amount_text.removeprefix("$").replace(",", "").removesuffix(".00"))
-        date_text = required_text("td.fines-date")
-        try:
-            date = datetime.strptime(date_text, "%m/%d/%y").isoformat()
-        except ValueError as exc:
-            raise ValueError(f"Invalid Spotrac fine date {date_text!r} for {full_name}") from exc
+        # Spotrac lists the NFL week of each fine ("Week 10", "Preseason", "Offseason") instead of a date
+        week_text = required_text("td.fines-week")
+        week_match = re.fullmatch(r"Week (\d+)", week_text)
+        if week_match is not None:
+            week = int(week_match.group(1))
+        elif week_text in ("Preseason", "Offseason"):
+            week = 0
+        else:
+            raise ValueError(f"Invalid Spotrac fine week {week_text!r} for {full_name}")
         infraction = player.select_one("td.fines-infraction")
         if infraction is None:
             raise ValueError(f"Missing Spotrac infraction for {full_name}")
@@ -131,7 +134,7 @@ class HighRollerFeature(BaseFeature):
             "violation": violation or None,
             "violation_fine": amount,
             "violation_season": season,
-            "violation_date": date,
+            "violation_week": week,
         }
 
     # noinspection PyCallingNonCallable
@@ -196,7 +199,7 @@ class HighRollerFeature(BaseFeature):
             else:
                 self.feature_data[normalized_player_key]["fines"].append(player_fine_info)
                 self.feature_data[normalized_player_key]["fines"].sort(
-                    key=lambda x: (-x["violation_fine"], -datetime.fromisoformat(x["violation_date"]).timestamp())
+                    key=lambda x: (-x["violation_fine"], -x["violation_week"])
                 )
                 self.feature_data[normalized_player_key]["fines_count"] += 1
                 self.feature_data[normalized_player_key]["fines_total"] += player_fine_info["violation_fine"]
